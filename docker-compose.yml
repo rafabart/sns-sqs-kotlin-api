@@ -10,7 +10,6 @@ services:
       - AWS_DEFAULT_REGION=sa-east-1
       - AWS_ACCESS_KEY_ID=foo
       - AWS_SECRET_ACCESS_KEY=bar
-      - DEFAULT_REGION=eu-central-1
     ports:
       - '4566:4566'
 
@@ -20,22 +19,24 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID=foo
       - AWS_SECRET_ACCESS_KEY=bar
-      - AWS_DEFAULT_REGION=eu-central-1
+      - AWS_DEFAULT_REGION=sa-east-1
 
     entrypoint: /bin/sh -c
 
     command: >
       "
-        sleep 20
+        sleep 5
         aws --endpoint-url=http://localstack:4566 sns create-topic --name order-topic
         aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name order-queue
-        aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:eu-central-1:000000000000:order-topic --protocol sqs --notification-endpoint arn:aws:sqs:eu-central-1:000000000000:order-queue
-        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn arn:aws:sns:eu-central-1:000000000000:order-topic:e7df5d79-6a83-4c25-90f4-18c54cf3c11b --attribute-name FilterPolicy --attribute-value '{ \"orderType\": [\"ORDER_CREATED\"] }'
-        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn arn:aws:sns:eu-central-1:000000000000:order-topic:e7df5d79-6a83-4c25-90f4-18c54cf3c11b --attribute-name RawMessageDelivery --attribute-value true
+        subscription_arn=$$(aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic --protocol sqs --notification-endpoint arn:aws:sqs:sa-east-1:000000000000:order-queue --output text)
+        echo $${subscription_arn}
+        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn $${subscription_arn} --attribute-name FilterPolicy --attribute-value '{ \"orderType\": [\"ORDER_CREATED\"] }'
+        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn $${subscription_arn} --attribute-name RawMessageDelivery --attribute-value true
+        echo Concluído...
         tail /dev/stdout
       "
     depends_on:
       - localstack
 
-#  aws --endpoint-url=http://localstack:4566 sqs get-queue-attributes --queue-url http://localstack:4566/000000000000/order-queue --attribute-names All
-#  aws --endpoint-url=http://localstack:4566 sns get-topic-attributes --topic-arn="arn:aws:sns:eu-central-1:000000000000:order-topic"
+#     aws --endpoint-url=http://localstack:4566 sqs get-queue-attributes --queue-url http://localhost:4566/000000000000/order-queue --attribute-names All
+#     aws --endpoint-url=http://localstack:4566 sns get-topic-attributes --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic
