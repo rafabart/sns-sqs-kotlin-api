@@ -14,9 +14,17 @@ class SimpleObjectConsumer {
 
 
     @SqsListener(
-        value = ["http://localhost:4566/000000000000/order-queue"],
+        value = ["http://localhost:4566/000000000000/order-queue-created"],
         deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS
     )
-    fun consume(@NotificationMessage orderEventVO: OrderEventVO) =
-        logger.info("[${logger}] - [consume] - Received order event=${orderEventVO} for consumer")
+    fun consumeCreated(@NotificationMessage orderEventVO: OrderEventVO) =
+        logger.info("[${logger}] - [consumeCreated] - Received order event=${orderEventVO} for consumer")
+
+
+    @SqsListener(
+        value = ["http://localhost:4566/000000000000/order-queue-cancelled"],
+        deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS
+    )
+    fun consumeCancelled(@NotificationMessage orderEventVO: OrderEventVO) =
+        logger.info("[${logger}] - [consumeCancelled] - Received order event=${orderEventVO} for consumer")
 }

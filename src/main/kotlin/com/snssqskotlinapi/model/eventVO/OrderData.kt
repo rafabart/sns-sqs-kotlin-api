@@ -1,7 +1,8 @@
 package com.snssqskotlinapi.model.eventVO
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.UUID
+import com.snssqskotlinapi.model.enums.OrderType
+import java.util.*
 
 data class OrderData(
 
@@ -9,6 +10,9 @@ data class OrderData(
     val orderId: UUID = UUID.randomUUID(),
 
     @JsonProperty("owner")
-    val owner: String
+    val owner: String,
+
+    @JsonProperty("orderType")
+    val orderType: OrderType
 
 )

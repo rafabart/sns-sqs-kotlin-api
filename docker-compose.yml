@@ -27,16 +27,25 @@ services:
       "
         sleep 5
         aws --endpoint-url=http://localstack:4566 sns create-topic --name order-topic
-        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name order-queue
-        subscription_arn=$$(aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic --protocol sqs --notification-endpoint arn:aws:sqs:sa-east-1:000000000000:order-queue --output text)
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name order-queue-created
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name order-queue-cancelled
+        subscription_arn=$$(aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic --protocol sqs --notification-endpoint arn:aws:sqs:sa-east-1:000000000000:order-queue-created --output text)
         echo $${subscription_arn}
-        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn $${subscription_arn} --attribute-name FilterPolicy --attribute-value '{ \"orderType\": [\"ORDER_CREATED\"] }'
+        subscription_arn2=$$(aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic --protocol sqs --notification-endpoint arn:aws:sqs:sa-east-1:000000000000:order-queue-cancelled --output text)
+        echo $${subscription_arn2}
+        aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn $${subscription_arn} --attribute-name FilterPolicy --attribute-value '{\"orderType\": [\"ORDER_CREATED\"]}'
         aws --endpoint-url=http://localstack:4566 sns set-subscription-attributes --subscription-arn $${subscription_arn} --attribute-name RawMessageDelivery --attribute-value true
+
         echo Concluído...
+        echo Exibindo atributos da fila de created...
+        aws --endpoint-url=http://localstack:4566 sqs get-queue-attributes --queue-url http://localhost:4566/000000000000/order-queue-created --attribute-names All
+        echo Exibindo atributos da fila de cancelled...
+        aws --endpoint-url=http://localstack:4566 sqs get-queue-attributes --queue-url http://localhost:4566/000000000000/order-queue-cancelled --attribute-names All
+        echo Exibindo atributos do topico...
+        aws --endpoint-url=http://localstack:4566 sns get-subscription-attributes --subscription-arn $${subscription_arn}
+        echo Exibindo atributos do topico...
+        aws --endpoint-url=http://localstack:4566 sns get-subscription-attributes --subscription-arn $${subscription_arn2}
         tail /dev/stdout
       "
     depends_on:
       - localstack
-
-#     aws --endpoint-url=http://localstack:4566 sqs get-queue-attributes --queue-url http://localhost:4566/000000000000/order-queue --attribute-names All
-#     aws --endpoint-url=http://localstack:4566 sns get-topic-attributes --topic-arn arn:aws:sns:sa-east-1:000000000000:order-topic

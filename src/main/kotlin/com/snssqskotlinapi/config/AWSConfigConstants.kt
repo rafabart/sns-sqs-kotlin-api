@@ -24,7 +24,7 @@ class AWSConfigConstants(
     @Value("\${cloud.aws.sns.order-topic.arn}")
     val orderTopic: String,
 
-    @Value("\${cloud.aws.sqs.order-queue.url}")
-    val orderQueue: String,
+    @Value("\${cloud.aws.sqs.order-queue-created.url}")
+    val orderQueueCreated: String,
 
     )

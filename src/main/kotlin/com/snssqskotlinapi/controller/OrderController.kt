@@ -23,7 +23,7 @@ class OrderController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrder(@RequestBody orderRequestVO: OrderRequestVO) {
-        OrderData(owner = orderRequestVO.owner)
+        OrderData(owner = orderRequestVO.owner, orderType = orderRequestVO.orderType)
             .let {
                 OrderEventVO(
                     orderData = it,

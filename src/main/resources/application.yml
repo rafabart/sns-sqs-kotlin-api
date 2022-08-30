@@ -8,17 +8,17 @@ cloud:
       secret-key: bar
     endpoint: http://localhost:4566
     sqs:
-      order-queue:
-        url: http://localhost:4566/000000000000/order-queue
-        name: order-queue
-#      order-queue-2:
-#        url: http://localhost:4566/000000000000/order-queue-2
-#        name: order-queue-2
+      order-queue-created:
+        url: http://localhost:4566/000000000000/order-queue-created
+        name: order-queue-created
+      order-queue-cancelled:
+        url: http://localhost:4566/000000000000/order-queue-cancelled
+        name: order-queue-cancelled
     sns:
       order-topic:
-        arn: arn:aws:sns:eu-central-1:000000000000:order-topic
+        arn: arn:aws:sns:sa-east-1:000000000000:order-topic
         name: order-topic
     stack:
       auto: false
     region:
-      static: eu-central-1
+      static: sa-east-1
